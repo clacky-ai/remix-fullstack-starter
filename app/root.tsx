@@ -14,6 +14,7 @@ import {
   useLoaderData,
   useRouteError,
   isRouteErrorResponse,
+  useLocation,
 } from "@remix-run/react";
 import Layout from "~/components/Layout";
 import stylesheet from "./tailwind.css";
@@ -51,6 +52,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export function ErrorBoundary() {
   const error = useRouteError();
+  const errorLocation = useLocation();
+  
+  // 检查是否在后台路由中
+  const isAdminError = errorLocation.pathname.startsWith('/admin');
 
   if (isRouteErrorResponse(error)) {
     return (
@@ -62,29 +67,46 @@ export function ErrorBoundary() {
           <meta name="viewport" content="width=device-width, initial-scale=1" />
         </head>
         <body className="h-full bg-gray-50">
-          <Layout>
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-              <div className="max-w-md w-full text-center">
-                <div className="bg-white rounded-lg shadow-md p-8">
-                  <div className="text-6xl font-bold text-red-500 mb-4">
-                    {error.status}
-                  </div>
-                  <h1 className="text-2xl font-semibold text-gray-900 mb-2">
-                    {error.status === 404 ? "Page Not Found" : "Error"}
-                  </h1>
-                  <p className="text-gray-600 mb-6">
-                    {error.statusText || error.data?.message || "Something went wrong"}
-                  </p>
-                  <a
-                    href="/"
-                    className="btn-primary px-6 py-3 inline-block"
-                  >
-                    Go Home
-                  </a>
+          <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+            <div className="max-w-md w-full text-center">
+              <div className="bg-white rounded-lg shadow-md p-8">
+                <div className="text-6xl font-bold text-red-500 mb-4">
+                  {error.status}
+                </div>
+                <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+                  {error.status === 404 ? "Page Not Found" : "Error"}
+                </h1>
+                <p className="text-gray-600 mb-6">
+                  {error.statusText || error.data?.message || "Something went wrong"}
+                </p>
+                <div className="flex space-x-4 justify-center">
+                  {isAdminError ? (
+                    <>
+                      <a
+                        href="/admin/login"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg inline-block"
+                      >
+                        Admin Login
+                      </a>
+                      <a
+                        href="/"
+                        className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg inline-block"
+                      >
+                        Go Home
+                      </a>
+                    </>
+                  ) : (
+                    <a
+                      href="/"
+                      className="btn-primary px-6 py-3 inline-block"
+                    >
+                      Go Home
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
-          </Layout>
+          </div>
           <ScrollRestoration />
           <Scripts />
           <LiveReload />
@@ -93,6 +115,10 @@ export function ErrorBoundary() {
     );
   }
 
+  // 对于一般错误也检查是否在后台路由
+  const genericErrorLocation = useLocation();
+  const isAdminGenericError = genericErrorLocation.pathname.startsWith('/admin');
+  
   return (
     <html lang="en" className="h-full">
       <head>
@@ -102,29 +128,46 @@ export function ErrorBoundary() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body className="h-full bg-gray-50">
-        <Layout>
-          <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-            <div className="max-w-md w-full text-center">
-              <div className="bg-white rounded-lg shadow-md p-8">
-                <div className="text-6xl font-bold text-red-500 mb-4">
-                  💥
-                </div>
-                <h1 className="text-2xl font-semibold text-gray-900 mb-2">
-                  Something went wrong
-                </h1>
-                <p className="text-gray-600 mb-6">
-                  {error instanceof Error ? error.message : "An unexpected error occurred"}
-                </p>
-                <a
-                  href="/"
-                  className="btn-primary px-6 py-3 inline-block"
-                >
-                  Go Home
-                </a>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+          <div className="max-w-md w-full text-center">
+            <div className="bg-white rounded-lg shadow-md p-8">
+              <div className="text-6xl font-bold text-red-500 mb-4">
+                💥
+              </div>
+              <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+                Something went wrong
+              </h1>
+              <p className="text-gray-600 mb-6">
+                {error instanceof Error ? error.message : "An unexpected error occurred"}
+              </p>
+              <div className="flex space-x-4 justify-center">
+                {isAdminGenericError ? (
+                  <>
+                    <a
+                      href="/admin/login"
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg inline-block"
+                    >
+                      Admin Login
+                    </a>
+                    <a
+                      href="/"
+                      className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg inline-block"
+                    >
+                      Go Home
+                    </a>
+                  </>
+                ) : (
+                  <a
+                    href="/"
+                    className="btn-primary px-6 py-3 inline-block"
+                  >
+                    Go Home
+                  </a>
+                )}
               </div>
             </div>
           </div>
-        </Layout>
+        </div>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
@@ -135,6 +178,8 @@ export function ErrorBoundary() {
 
 export default function App() {
   const data = useLoaderData<typeof loader>();
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
     <html lang="en" className="h-full">
@@ -145,9 +190,13 @@ export default function App() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body className="h-full bg-gray-50">
-        <Layout>
+        {isAdminRoute ? (
           <Outlet />
-        </Layout>
+        ) : (
+          <Layout>
+            <Outlet />
+          </Layout>
+        )}
         <ScrollRestoration />
         <Scripts />
         <script

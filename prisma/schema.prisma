@@ -17,8 +17,8 @@ model User {
   id        Int      @id @default(autoincrement())
   name      String
   email     String   @unique
-  role      String   @default("User")
   avatar    String?
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
@@ -26,17 +26,74 @@ model User {
   posts     Post[]
 }
 
+model Admin {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      AdminRole @default(ADMIN)
+  avatar    String?
+  isActive  Boolean  @default(true)
+  lastLogin DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  sessions  AdminSession[]
+  auditLogs AuditLog[]
+}
+
+enum AdminRole {
+  ADMIN
+  SUPER_ADMIN
+}
+
+model AdminSession {
+  id        String   @id @default(cuid())
+  adminId   Int
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  // Relations
+  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+}
+
 model Post {
   id        Int      @id @default(autoincrement())
   title     String
   excerpt   String
+  content   String?  @db.Text
   author    String
   date      DateTime @default(now())
   category  String
+  status    PostStatus @default(DRAFT)
+  isPublished Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
   // Relations
   userId    Int?
   user      User?    @relation(fields: [userId], references: [id])
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  adminId   Int
+  action    String   // CREATE, UPDATE, DELETE, LOGIN, etc.
+  resource  String   // USER, POST, ADMIN, etc.
+  resourceId Int?
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  
+  // Relations
+  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
 }

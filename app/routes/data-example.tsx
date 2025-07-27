@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { getUsers, getPosts } from "~/lib/db.server";
+import { getUsers, getPosts, getAdminUsers } from "~/lib/db.server";
 
 export const meta: MetaFunction = () => {
   return [
@@ -13,9 +13,10 @@ export const meta: MetaFunction = () => {
 export async function loader({ request }: LoaderFunctionArgs) {
   try {
     // Fetch data from the database
-    const [users, posts] = await Promise.all([
+    const [users, posts, admins] = await Promise.all([
       getUsers(),
-      getPosts()
+      getPosts(),
+      getAdminUsers()
     ]);
 
     // Format posts to match the expected structure
@@ -24,8 +25,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
       date: post.date.toISOString().split('T')[0] // Format date as YYYY-MM-DD
     }));
 
+    // Combine users and admins for display, adding a userType field
+    const allUsers = [
+      ...users.map(user => ({ ...user, userType: 'User' as const })),
+      ...admins.map(admin => ({ ...admin, userType: 'Admin' as const, adminRole: admin.role }))
+    ];
+
     return json({
-      users,
+      users: allUsers,
       posts: formattedPosts,
       loadedAt: new Date().toISOString()
     });
@@ -68,11 +75,11 @@ export default function DataExample() {
                     <h3 className="font-semibold text-gray-900">{user.name}</h3>
                     <p className="text-gray-600">{user.email}</p>
                     <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                      user.role === 'Admin' 
+                      user.userType === 'Admin' 
                         ? 'bg-red-100 text-red-800' 
                         : 'bg-green-100 text-green-800'
                     }`}>
-                      {user.role}
+                      {user.userType === 'Admin' ? `Admin (${user.adminRole})` : user.userType}
                     </span>
                   </div>
                 </div>
