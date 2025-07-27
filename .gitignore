@@ -61,3 +61,11 @@ Thumbs.db
 *.backup
 *.bak
 *.tmp
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Prisma
+prisma/migrations/
