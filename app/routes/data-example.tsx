@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
+import { getUsers, getPosts } from "~/lib/db.server";
 
 export const meta: MetaFunction = () => {
   return [
@@ -9,86 +10,29 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-type User = {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  avatar: string;
-};
-
-type Post = {
-  id: number;
-  title: string;
-  excerpt: string;
-  author: string;
-  date: string;
-  category: string;
-};
-
-// Simulate API delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 export async function loader({ request }: LoaderFunctionArgs) {
-  // Simulate fetching data from an API
-  await delay(500);
+  try {
+    // Fetch data from the database
+    const [users, posts] = await Promise.all([
+      getUsers(),
+      getPosts()
+    ]);
 
-  const users: User[] = [
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john@example.com",
-      role: "Admin",
-      avatar: "https://ui-avatars.com/api/?name=John+Doe&background=3b82f6&color=fff"
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane@example.com",
-      role: "User",
-      avatar: "https://ui-avatars.com/api/?name=Jane+Smith&background=10b981&color=fff"
-    },
-    {
-      id: 3,
-      name: "Bob Johnson",
-      email: "bob@example.com",
-      role: "User",
-      avatar: "https://ui-avatars.com/api/?name=Bob+Johnson&background=f59e0b&color=fff"
-    }
-  ];
+    // Format posts to match the expected structure
+    const formattedPosts = posts.map(post => ({
+      ...post,
+      date: post.date.toISOString().split('T')[0] // Format date as YYYY-MM-DD
+    }));
 
-  const posts: Post[] = [
-    {
-      id: 1,
-      title: "Getting Started with Remix",
-      excerpt: "Learn how to build modern web applications with Remix framework...",
-      author: "John Doe",
-      date: "2024-01-15",
-      category: "Tutorial"
-    },
-    {
-      id: 2,
-      title: "TypeScript Best Practices",
-      excerpt: "Explore advanced TypeScript patterns and techniques for better code...",
-      author: "Jane Smith",
-      date: "2024-01-20",
-      category: "Development"
-    },
-    {
-      id: 3,
-      title: "Tailwind CSS Tips",
-      excerpt: "Discover useful Tailwind CSS utilities and customization options...",
-      author: "Bob Johnson",
-      date: "2024-01-25",
-      category: "Design"
-    }
-  ];
-
-  return json({
-    users,
-    posts,
-    loadedAt: new Date().toISOString()
-  });
+    return json({
+      users,
+      posts: formattedPosts,
+      loadedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Database error:', error);
+    throw new Response('Database error', { status: 500 });
+  }
 }
 
 export default function DataExample() {
@@ -101,10 +45,10 @@ export default function DataExample() {
           Data Loading Example
         </h1>
         
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
-          <p className="text-blue-800">
-            This page demonstrates how to use Remix loaders to fetch data on the server before rendering. 
-            The data below was loaded at: <strong>{new Date(loadedAt).toLocaleString()}</strong>
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-8">
+          <p className="text-green-800">
+            This page demonstrates how to use Remix loaders to fetch data from a PostgreSQL database using Prisma ORM. 
+            The data below was loaded from the database at: <strong>{new Date(loadedAt).toLocaleString()}</strong>
           </p>
         </div>
 
@@ -116,7 +60,7 @@ export default function DataExample() {
               {users.map((user) => (
                 <div key={user.id} className="card flex items-center space-x-4">
                   <img
-                    src={user.avatar}
+                    src={user.avatar || ''}
                     alt={user.name}
                     className="w-12 h-12 rounded-full"
                   />

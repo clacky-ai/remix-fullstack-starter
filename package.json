@@ -9,13 +9,24 @@
     "build": "remix build",
     "dev": "remix dev --manual",
     "start": "remix-serve ./build/index.js",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:reset": "prisma migrate reset",
+    "db:push": "prisma db push"
   },
   "dependencies": {
+    "@prisma/client": "^6.12.0",
     "@remix-run/node": "^2.17.0",
     "@remix-run/react": "^2.17.0",
     "@remix-run/serve": "^2.17.0",
+    "@types/pg": "^8.15.4",
     "isbot": "^4.1.0",
+    "pg": "^8.16.3",
+    "prisma": "^6.12.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
