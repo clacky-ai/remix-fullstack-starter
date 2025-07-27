@@ -1,12 +1,13 @@
 # Remix Full-Stack Template
 
-A complete Remix full-stack application template with TypeScript, Tailwind CSS, routing, data loading, and form handling.
+A complete Remix full-stack application template with TypeScript, Tailwind CSS, PostgreSQL database integration using Prisma ORM, routing, data loading, and form handling.
 
 ## Features
 
 - ✅ **TypeScript Support** - Full TypeScript support with proper type checking
 - ✅ **Tailwind CSS** - Utility-first CSS framework with custom components
 - ✅ **Server-Side Rendering** - Fast initial page loads with SSR
+- ✅ **Database Integration** - PostgreSQL database with Prisma ORM
 - ✅ **Data Loading** - Server-side data fetching with Remix loaders
 - ✅ **Form Handling** - Form submissions with validation and actions
 - ✅ **Error Boundaries** - Comprehensive error handling
@@ -17,6 +18,8 @@ A complete Remix full-stack application template with TypeScript, Tailwind CSS, 
 
 - **Framework**: Remix
 - **Language**: TypeScript
+- **Database**: PostgreSQL
+- **ORM**: Prisma
 - **Styling**: Tailwind CSS
 - **Build Tool**: Vite
 - **Runtime**: Node.js
@@ -29,13 +32,20 @@ A complete Remix full-stack application template with TypeScript, Tailwind CSS, 
 │   ├── components/          # Reusable UI components
 │   │   ├── Layout.tsx       # Main layout component
 │   │   └── ErrorBoundary.tsx # Error boundary component
+│   ├── lib/                 # Server-side utilities
+│   │   └── db.server.ts     # Database service layer
 │   ├── routes/              # Route components
 │   │   ├── _index.tsx       # Homepage
 │   │   ├── about.tsx        # About page
 │   │   ├── contact.tsx      # Contact form with validation
-│   │   └── data-example.tsx # Data loading example
+│   │   └── data-example.tsx # Database data loading example
 │   ├── root.tsx             # Root component
 │   └── tailwind.css         # Tailwind styles
+├── prisma/
+│   ├── migrations/          # Database migrations
+│   ├── schema.prisma        # Database schema
+│   └── seed.ts              # Database seed script
+├── .env                     # Environment variables (not committed)
 ├── package.json
 ├── tailwind.config.ts       # Tailwind configuration
 ├── tsconfig.json           # TypeScript configuration
@@ -50,12 +60,25 @@ A complete Remix full-stack application template with TypeScript, Tailwind CSS, 
    npm install
    ```
 
-2. **Start the development server**:
+2. **Set up the database**:
+   - PostgreSQL should be available in your environment
+   - Copy `.env.example` to `.env` and update database credentials
+   - Run database migrations:
+   ```bash
+   npm run db:migrate
+   ```
+
+3. **Seed the database** (optional):
+   ```bash
+   npm run db:seed
+   ```
+
+4. **Start the development server**:
    ```bash
    npm run dev
    ```
 
-3. **Open your browser** and navigate to `http://localhost:3000`
+5. **Open your browser** and navigate to `http://localhost:3000`
 
 ## Available Scripts
 
@@ -63,6 +86,11 @@ A complete Remix full-stack application template with TypeScript, Tailwind CSS, 
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run typecheck` - Run TypeScript type checking
+- `npm run db:migrate` - Run database migrations
+- `npm run db:generate` - Generate Prisma client
+- `npm run db:studio` - Open Prisma Studio
+- `npm run db:seed` - Seed database with sample data
+- `npm run db:reset` - Reset database and run migrations
 
 ## Example Pages
 
@@ -82,18 +110,33 @@ A complete Remix full-stack application template with TypeScript, Tailwind CSS, 
 - Success/error states
 
 ### Data Example Page (`/data-example`)
-- Server-side data fetching
-- Loader function example
-- Dynamic content rendering
+- PostgreSQL database integration
+- Real data fetching with Prisma ORM
+- Server-side data loading with relationships
 
 ## Key Concepts Demonstrated
 
-### Data Loading
+### Database Operations
+```typescript
+// Database service layer (app/lib/db.server.ts)
+import { prisma } from "~/lib/db.server";
+
+export async function getUsers() {
+  return prisma.user.findMany({
+    orderBy: { createdAt: "desc" }
+  });
+}
+```
+
+### Data Loading with Database
 ```typescript
 export async function loader({ request }: LoaderFunctionArgs) {
-  // Fetch data on the server
-  const data = await fetchData();
-  return json(data);
+  // Fetch data from PostgreSQL database
+  const [users, posts] = await Promise.all([
+    getUsers(),
+    getPosts()
+  ]);
+  return json({ users, posts });
 }
 ```
 
