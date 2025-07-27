@@ -69,7 +69,14 @@ Thumbs.db
 
 # Prisma
 prisma/migrations/
+
+# Generated files and directories
 generated/
+**/generated/
+*.generated.*
 
 # Cache directories
 .cache/
+**/.cache/
+cache/
+**/cache/
