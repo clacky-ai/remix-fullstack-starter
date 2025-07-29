@@ -25,16 +25,19 @@ export async function loader({ request }: LoaderFunctionArgs) {
       date: post.date.toISOString().split('T')[0] // Format date as YYYY-MM-DD
     }));
 
-    // Combine users and admins for display, adding a userType field
+    // Combine users and admins for display, adding a userType field and unique keys
     const allUsers = [
-      ...users.map(user => ({ ...user, userType: 'User' as const })),
-      ...admins.map(admin => ({ ...admin, userType: 'Admin' as const, adminRole: admin.role }))
+      ...users.map(user => ({ ...user, userType: 'User' as const, uniqueKey: `user-${user.id}` })),
+      ...admins.map(admin => ({ ...admin, userType: 'Admin' as const, adminRole: admin.role, uniqueKey: `admin-${admin.id}` }))
     ];
+
+    // Format date as a consistent format for SSR/client consistency
+    const loadedAtFormatted = new Date().toISOString().replace('T', ' ').slice(0, -5) + ' UTC';
 
     return data({
       users: allUsers,
       posts: formattedPosts,
-      loadedAt: new Date().toISOString()
+      loadedAt: loadedAtFormatted
     });
   } catch (error) {
     console.error('Database error:', error);
@@ -55,7 +58,7 @@ export default function DataExample() {
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-8">
           <p className="text-green-800">
             This page demonstrates how to use Remix loaders to fetch data from a PostgreSQL database using Prisma ORM. 
-            The data below was loaded from the database at: <strong>{new Date(loadedAt).toLocaleString()}</strong>
+            The data below was loaded from the database at: <strong>{loadedAt}</strong>
           </p>
         </div>
 
@@ -65,7 +68,7 @@ export default function DataExample() {
             <h2 className="text-2xl font-semibold text-gray-900 mb-6">Users</h2>
             <div className="space-y-4">
               {users.map((user) => (
-                <div key={user.id} className="card flex items-center space-x-4">
+                <div key={user.uniqueKey} className="card flex items-center space-x-4">
                   <img
                     src={user.avatar || ''}
                     alt={user.name}
@@ -98,7 +101,7 @@ export default function DataExample() {
                       {post.category}
                     </span>
                     <span className="text-sm text-gray-500">
-                      {new Date(post.date).toLocaleDateString()}
+                      {post.date}
                     </span>
                   </div>
                   <h3 className="font-semibold text-gray-900 mb-2">{post.title}</h3>

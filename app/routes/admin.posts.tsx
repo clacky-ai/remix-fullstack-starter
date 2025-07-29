@@ -75,10 +75,10 @@ export async function action({ request }: ActionFunctionArgs) {
       request,
     });
     
-    return data({ success: true });
+    return json({ success: true });
   }
 
-  return data({ error: "Invalid action" }, { status: 400 });
+  return json({ error: "Invalid action" }, { status: 400 });
 }
 
 export default function AdminPosts() {
