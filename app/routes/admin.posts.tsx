@@ -1,6 +1,6 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { useLoaderData, useFetcher, useSearchParams, Form } from "@remix-run/react";
+import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "react-router";
+import { data } from "react-router";
+import { useLoaderData, useFetcher, useSearchParams, Form } from "react-router";
 import { requireAdmin, createAuditLog } from "~/lib/auth.server";
 import { getPostsWithPagination, updatePostStatus, deletePost, searchPosts } from "~/lib/db.server";
 import { AdminLayout } from "~/components/AdminLayout";
@@ -37,7 +37,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     posts = await getPostsWithPagination(page, limit, search, status);
   }
 
-  return json({ admin, posts, currentPage: page, searchQuery: search, statusFilter: status });
+  return data({ admin, posts, currentPage: page, searchQuery: search, statusFilter: status });
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -60,7 +60,7 @@ export async function action({ request }: ActionFunctionArgs) {
       request,
     });
     
-    return json({ success: true });
+    return data({ success: true });
   }
 
   if (intent === "delete") {
@@ -75,10 +75,10 @@ export async function action({ request }: ActionFunctionArgs) {
       request,
     });
     
-    return json({ success: true });
+    return data({ success: true });
   }
 
-  return json({ error: "Invalid action" }, { status: 400 });
+  return data({ error: "Invalid action" }, { status: 400 });
 }
 
 export default function AdminPosts() {

@@ -1,6 +1,6 @@
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import type { LoaderFunctionArgs, MetaFunction } from "react-router";
+import { data } from "react-router";
+import { useLoaderData } from "react-router";
 import { getUsers, getPosts, getAdminUsers } from "~/lib/db.server";
 
 export const meta: MetaFunction = () => {
@@ -31,7 +31,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       ...admins.map(admin => ({ ...admin, userType: 'Admin' as const, adminRole: admin.role }))
     ];
 
-    return json({
+    return data({
       users: allUsers,
       posts: formattedPosts,
       loadedAt: new Date().toISOString()

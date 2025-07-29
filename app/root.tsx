@@ -2,11 +2,10 @@ import type {
   LinksFunction,
   LoaderFunctionArgs,
   MetaFunction,
-} from "@remix-run/node";
-import { json } from "@remix-run/node";
+} from "react-router";
+import { data } from "react-router";
 import {
   Links,
-  LiveReload,
   Meta,
   Outlet,
   Scripts,
@@ -15,9 +14,9 @@ import {
   useRouteError,
   isRouteErrorResponse,
   useLocation,
-} from "@remix-run/react";
+} from "react-router";
 import Layout from "~/components/Layout";
-import stylesheet from "./tailwind.css";
+import "./tailwind.css";
 
 export const meta: MetaFunction = () => {
   return [
@@ -27,7 +26,6 @@ export const meta: MetaFunction = () => {
 };
 
 export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: stylesheet },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",
@@ -41,7 +39,7 @@ export const links: LinksFunction = () => [
 ];
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  return json({
+  return data({
     ENV: {
       NODE_ENV: process.env.NODE_ENV,
     },
@@ -109,7 +107,6 @@ export function ErrorBoundary() {
           </div>
           <ScrollRestoration />
           <Scripts />
-          <LiveReload />
         </body>
       </html>
     );
@@ -170,7 +167,6 @@ export function ErrorBoundary() {
         </div>
         <ScrollRestoration />
         <Scripts />
-        <LiveReload />
       </body>
     </html>
   );
@@ -204,7 +200,6 @@ export default function App() {
             __html: `window.ENV = ${JSON.stringify(data.ENV)}`,
           }}
         />
-        <LiveReload />
       </body>
     </html>
   );

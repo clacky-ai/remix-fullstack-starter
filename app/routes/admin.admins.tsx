@@ -1,6 +1,6 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { useLoaderData, useFetcher, Form, useActionData } from "@remix-run/react";
+import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "react-router";
+import { data } from "react-router";
+import { useLoaderData, useFetcher, Form, useActionData } from "react-router";
 import { requireSuperAdmin, createAuditLog, hashPassword } from "~/lib/auth.server";
 import { getAdminUsers, toggleAdminActive, deleteAdmin, createAdmin, updateAdminRole } from "~/lib/db.server";
 import { AdminLayout } from "~/components/AdminLayout";
@@ -17,7 +17,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const admin = await requireSuperAdmin(request);
   const admins = await getAdminUsers();
   
-  return json({ admin, admins });
+  return data({ admin, admins });
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -32,7 +32,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const role = formData.get("role")?.toString() as "ADMIN" | "SUPER_ADMIN";
 
     if (!name || !email || !password) {
-      return json({ error: "All fields are required" }, { status: 400 });
+      return data({ error: "All fields are required" }, { status: 400 });
     }
 
     try {
@@ -53,12 +53,12 @@ export async function action({ request }: ActionFunctionArgs) {
         request,
       });
 
-      return json({ success: true, message: "Admin created successfully" });
+      return data({ success: true, message: "Admin created successfully" });
     } catch (error: any) {
       if (error.code === "P2002") {
-        return json({ error: "Email already exists" }, { status: 400 });
+        return data({ error: "Email already exists" }, { status: 400 });
       }
-      return json({ error: "Failed to create admin" }, { status: 500 });
+      return data({ error: "Failed to create admin" }, { status: 500 });
     }
   }
 
@@ -77,7 +77,7 @@ export async function action({ request }: ActionFunctionArgs) {
       request,
     });
     
-    return json({ success: true });
+    return data({ success: true });
   }
 
   if (intent === "update-role") {
@@ -95,7 +95,7 @@ export async function action({ request }: ActionFunctionArgs) {
       request,
     });
     
-    return json({ success: true });
+    return data({ success: true });
   }
 
   if (intent === "delete") {
@@ -103,7 +103,7 @@ export async function action({ request }: ActionFunctionArgs) {
     
     // Prevent deleting self
     if (adminId === admin.id) {
-      return json({ error: "Cannot delete your own account" }, { status: 400 });
+      return data({ error: "Cannot delete your own account" }, { status: 400 });
     }
     
     await deleteAdmin(adminId);
@@ -117,10 +117,10 @@ export async function action({ request }: ActionFunctionArgs) {
       request,
     });
     
-    return json({ success: true });
+    return data({ success: true });
   }
 
-  return json({ error: "Invalid action" }, { status: 400 });
+  return data({ error: "Invalid action" }, { status: 400 });
 }
 
 export default function AdminAdmins() {

@@ -1,4 +1,4 @@
-import { Form, Link, useLocation } from "@remix-run/react";
+import { Form, Link, useLocation } from "react-router";
 import type { Admin } from "@prisma/client";
 
 interface AdminLayoutProps {
