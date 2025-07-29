@@ -1,6 +1,6 @@
-import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { Form, useActionData, useNavigation } from "@remix-run/react";
+import type { ActionFunctionArgs, MetaFunction } from "react-router";
+import { data } from "react-router";
+import { Form, useActionData, useNavigation } from "react-router";
 
 export const meta: MetaFunction = () => {
   return [
@@ -39,14 +39,14 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   if (Object.keys(errors).length > 0) {
-    return json<ActionData>({ errors }, { status: 400 });
+    return data<ActionData>({ errors }, { status: 400 });
   }
 
   // In a real app, you would save the data to a database
   // For now, we'll just simulate a successful submission
   await new Promise(resolve => setTimeout(resolve, 1000));
 
-  return json<ActionData>({ success: true });
+  return data<ActionData>({ success: true });
 }
 
 export default function Contact() {

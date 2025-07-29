@@ -1,6 +1,6 @@
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import type { LoaderFunctionArgs, MetaFunction } from "react-router";
+import { data } from "react-router";
+import { useLoaderData } from "react-router";
 import { requireAdmin } from "~/lib/auth.server";
 import { getDashboardStats } from "~/lib/db.server";
 import { AdminLayout } from "~/components/AdminLayout";
@@ -16,7 +16,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const admin = await requireAdmin(request);
   const stats = await getDashboardStats();
   
-  return json({ admin, stats });
+  return data({ admin, stats });
 }
 
 export default function AdminDashboard() {

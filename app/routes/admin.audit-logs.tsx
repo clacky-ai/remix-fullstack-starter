@@ -1,6 +1,6 @@
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { useLoaderData, useSearchParams, Form } from "@remix-run/react";
+import type { LoaderFunctionArgs, MetaFunction } from "react-router";
+import { data } from "react-router";
+import { useLoaderData, useSearchParams, Form } from "react-router";
 import { requireAdmin } from "~/lib/auth.server";
 import { getAuditLogs } from "~/lib/db.server";
 import { AdminLayout } from "~/components/AdminLayout";
@@ -21,7 +21,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const auditLogs = await getAuditLogs(page, limit);
 
-  return json({ admin, auditLogs, currentPage: page });
+  return data({ admin, auditLogs, currentPage: page });
 }
 
 export default function AdminAuditLogs() {

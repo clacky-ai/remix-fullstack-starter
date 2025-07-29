@@ -1,6 +1,6 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
-import { Form, useActionData, useNavigation } from "@remix-run/react";
+import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "react-router";
+import { data, redirect } from "react-router";
+import { Form, useActionData, useNavigation } from "react-router";
 import { authenticateAdmin, createAdminSession, getAdminFromSession, createAuditLog } from "~/lib/auth.server";
 
 export const meta: MetaFunction = () => {
@@ -15,7 +15,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   if (admin) {
     return redirect("/admin/dashboard");
   }
-  return json({});
+  return data({});
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -24,7 +24,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const password = formData.get("password")?.toString();
 
   if (!email || !password) {
-    return json(
+    return data(
       { error: "Email and password are required" },
       { status: 400 }
     );
@@ -33,7 +33,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const admin = await authenticateAdmin(email, password);
   
   if (!admin) {
-    return json(
+    return data(
       { error: "Invalid email or password" },
       { status: 401 }
     );

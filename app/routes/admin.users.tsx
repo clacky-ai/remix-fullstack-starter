@@ -1,6 +1,6 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
-import { useLoaderData, useFetcher, useSearchParams, Form } from "@remix-run/react";
+import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "react-router";
+import { data, redirect } from "react-router";
+import { useLoaderData, useFetcher, useSearchParams, Form } from "react-router";
 import { requireAdmin, createAuditLog } from "~/lib/auth.server";
 import { getUsersWithPagination, toggleUserActive, deleteUser, searchUsers } from "~/lib/db.server";
 import { AdminLayout } from "~/components/AdminLayout";
@@ -36,7 +36,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     users = await getUsersWithPagination(page, limit, search);
   }
 
-  return json({ admin, users, currentPage: page, searchQuery: search });
+  return data({ admin, users, currentPage: page, searchQuery: search });
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -59,7 +59,7 @@ export async function action({ request }: ActionFunctionArgs) {
       request,
     });
     
-    return json({ success: true });
+    return data({ success: true });
   }
 
   if (intent === "delete") {
